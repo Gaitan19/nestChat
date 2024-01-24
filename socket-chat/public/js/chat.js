@@ -1,7 +1,7 @@
-const username = localStorage.getItem('name');
-if (!username) {
+const infoUser = JSON.parse(localStorage.getItem('infoUser'));
+if (!infoUser) {
   window.location.replace('/');
-  throw new Error('Username is required');
+  throw new Error('infoUser is required');
 }
 
 //Referencias HTML
@@ -52,8 +52,8 @@ form.addEventListener('submit', (event) => {
 
 const socket = io({
   auth: {
-    token: 'abc-123',
-    name: username,
+    token: infoUser.token,
+    name: infoUser.email,
   },
 });
 

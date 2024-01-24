@@ -7,7 +7,7 @@ export class LoginDto {
     email: string;
 
     @IsString()
-    @MinLength(6)
+    @MinLength(1)
     @Transform(({ value }) => value.trim())
     password: string;
 }

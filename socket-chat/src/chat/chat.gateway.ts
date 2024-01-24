@@ -26,14 +26,14 @@ export class ChatGateway implements OnModuleInit {
       }
       // agregar cliente al listado
 
-      this.chatService.onClientConnected({ id: socket.id, name: name });
+      this.chatService.onClientConnected({ id: token, name: name });
 
       // mensaje de bienvenida
       // socket.emit('welcome-message', 'bienvenido al servidor');
       this.server.emit('on-clients-changed', this.chatService.getClients());
 
       socket.on('disconnect', () => {
-        this.chatService.onClientDisconnected(socket.id);
+        this.chatService.onClientDisconnected(token);
         this.server.emit('on-clients-changed', this.chatService.getClients());
       });
     });

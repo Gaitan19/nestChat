@@ -1,5 +1,58 @@
 @import url("https://fonts.googleapis.com/css?family=Red+Hat+Display:400,500,900&display=swap");
 
+/* styles login */
+.Login {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  max-width: 400px;
+  padding: 20px;
+}
+
+.Format-container {
+  text-align: center;
+}
+
+.Login-title {
+  color: #333;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.Input-container {
+  margin-bottom: 15px;
+}
+
+.Format-text {
+  color: #666;
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.Input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 8px;
+  width: 100%;
+}
+
+.Button {
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 10px 15px;
+}
+
+.Button:hover {
+  background-color: #0056b3;
+}
+/*  */
 .hidden {
   display: none;
 }
