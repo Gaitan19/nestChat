@@ -7,5 +7,17 @@ interface Client {
 
 @Injectable()
 export class ChatService {
-  private clients;
+  private clients: Record<string, Client> = {};
+
+  onClientConnected(client: Client) {
+    this.clients[client.id] = client;
+  }
+
+  onClientDisconnected(id: string) {
+    delete this.clients[id];
+  }
+
+  getClients() {
+    return Object.values(this.clients);
+  }
 }

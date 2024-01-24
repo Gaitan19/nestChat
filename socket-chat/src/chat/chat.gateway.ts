@@ -1,4 +1,10 @@
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+  ConnectedSocket,
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { OnModuleInit } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Server, Socket } from 'socket.io';
@@ -12,14 +18,42 @@ export class ChatGateway implements OnModuleInit {
 
   onModuleInit() {
     this.server.on('connection', (socket: Socket) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { name, token } = socket.handshake.auth;
-      // console.log('name :>> ', name, 'token>>', token);
       if (!name) {
         socket.disconnect();
         return;
       }
+      // agregar cliente al listado
 
-      socket.on('disconnect', () => {});
+      this.chatService.onClientConnected({ id: socket.id, name: name });
+
+      // mensaje de bienvenida
+      // socket.emit('welcome-message', 'bienvenido al servidor');
+      this.server.emit('on-clients-changed', this.chatService.getClients());
+
+      socket.on('disconnect', () => {
+        this.chatService.onClientDisconnected(socket.id);
+        this.server.emit('on-clients-changed', this.chatService.getClients());
+      });
+    });
+  }
+
+  @SubscribeMessage('send-message')
+  handleMessage(
+    @MessageBody() message: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { name, token } = client.handshake.auth;
+    console.log({ name, message });
+    if (!message) {
+      return;
+    }
+
+    this.server.emit('on-message', {
+      userId: client.id,
+      message: message,
+      name: name,
     });
   }
 }
