@@ -33,7 +33,10 @@ renderMessages = (payload) => {
     divElement.classList.add('incoming');
   }
 
-  divElement.innerHTML = message;
+  divElement.innerHTML = `
+  <small>${name}</small>
+  <p>${message}</p>
+  `;
   chatElement.appendChild(divElement);
   chatElement.scrollTop = chatElement.scrollHeight;
 };

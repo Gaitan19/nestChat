@@ -45,7 +45,6 @@ export class ChatGateway implements OnModuleInit {
     @ConnectedSocket() client: Socket,
   ) {
     const { name, token } = client.handshake.auth;
-    console.log({ name, message });
     if (!message) {
       return;
     }
