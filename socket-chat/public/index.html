@@ -16,28 +16,71 @@
   <div class="center">
 
       <!-- Inputs y Forms -->
-      <form class="form" onsubmit="">
-        <input placeholder="Tu nombre" type="text" />
+
+      <form class="Login">
+        <img src="./assets/images/logo-smbs-1.png" alt="">
+        <div class="Format-container">
+            <h2 class="Login-title Format-title">
+                WELCOME TO THE CHAT APP
+            </h2>
+
+            <div  class="Input-container">
+                <label for="Email-login" class="Format-text">Email Address</label>
+                <input class="Input" type="email" placeholder="Email Address" id="Email-login" required="">
+            </div>
+
+            <div  class="Input-container">
+                <label for="Password-login" class="Format-text">Password</label>
+                <input class="Input" type="password" placeholder="***************" id="Password-login" required="">
+            </div>
+
+            <button class="Button" id="Submit-login" type="submit">Login</button>
+        </div>
       </form>
+      <!--  -->
+      <!-- <form class="form" onsubmit="">
+        <input placeholder="Tu nombre" type="text" />
+      </form> -->
 
 
-    </div>
+    </di>
   </div>
 
 
   <script>
 
-    const form = document.querySelector('.form');
-    const input = document.querySelector('input');
+    const form = document.querySelector('.Login');
+    const inputEmail = document.querySelector('#Email-login');
+    const inputPassword = document.querySelector('#Password-login');
+
 
     form.addEventListener( 'submit', (e) => {
       e.preventDefault();
-      const name = input.value;
-      if ( name ) {
-        localStorage.setItem('name', name);
-        window.location.href = 'chat.html';
-      }
+      const email = inputEmail.value;
+      const password = inputPassword.value;
+
+
+fetch('http://localhost:3000/users',{
+  method: 'POST',
+  body:{
+    email,password
+  }
+}).then(response => response.json()).then(data => console.log(data));
+
+
+      // if ( email && password) {
+      //   localStorage.setItem('email', email);
+      //   localStorage.setItem('password', password);
+      //   window.location.href = 'chat.html';
+      // }
+
+
+      // if ( password ) {
+      //   window.location.href = 'chat.html';
+      // }
     })
+
+    
 
 
   </script>
