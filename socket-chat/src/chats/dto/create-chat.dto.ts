@@ -1,8 +1,8 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateChatDto {
-  @IsNumber()
-  idUser: number;
+  @IsString()
+  email: string;
 
   @IsString()
   message: string;

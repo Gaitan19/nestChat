@@ -34,6 +34,11 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Post('/email')
+  findOneByEmail(@Body('email') email: string) {
+    return this.usersService.findOneByEmail(email);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);

@@ -6,7 +6,7 @@ export class Chat {
   @Column({ primary: true, generated: true })
   id: number;
 
-  @Column({ unique: true, nullable: false })
+  @Column()
   message: string;
 
   @ManyToOne(() => User, (user) => user.chats)

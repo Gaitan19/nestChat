@@ -17,8 +17,11 @@ export class ChatsService {
   ) {}
 
   async create(createChatDto: CreateChatDto) {
-    const { idUser, ...validDto } = createChatDto;
-    const userM = await this.usersRepository.findOneBy({ id: idUser });
+    const { email, ...validDto } = createChatDto;
+    const userM = await this.usersRepository.findOne({
+      where: { email },
+    });
+
     const chat = await this.chatsRepository.create({
       ...validDto,
       user: userM,
@@ -28,7 +31,7 @@ export class ChatsService {
   }
 
   findAll() {
-    return `This action returns all chats`;
+    return this.chatsRepository.find();
   }
 
   findOne(id: number) {
