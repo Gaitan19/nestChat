@@ -18,18 +18,18 @@ export class ChatGateway implements OnModuleInit {
 
   onModuleInit() {
     this.server.on('connection', (socket: Socket) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { name, token } = socket.handshake.auth;
       if (!name) {
         socket.disconnect();
         return;
       }
-      // agregar cliente al listado
 
-      this.chatService.onClientConnected({ id: token, name: name });
+      this.chatService.onClientConnected({
+        id: token,
+        name: name,
+        socketId: socket.id,
+      });
 
-      // mensaje de bienvenida
-      // socket.emit('welcome-message', 'bienvenido al servidor');
       this.server.emit('on-clients-changed', this.chatService.getClients());
 
       socket.on('disconnect', () => {
@@ -50,6 +50,23 @@ export class ChatGateway implements OnModuleInit {
     }
 
     this.server.emit('on-message', {
+      userId: client.id,
+      message: message,
+      name: name,
+    });
+  }
+
+  @SubscribeMessage('private-message')
+  handleMessagePrivate(
+    @MessageBody() { message, to },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { name, token } = client.handshake.auth;
+    if (!message) {
+      return;
+    }
+
+    client.to(to).emit('private-message', {
       userId: client.id,
       message: message,
       name: name,

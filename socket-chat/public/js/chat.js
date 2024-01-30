@@ -15,10 +15,16 @@ input = document.querySelector('input');
 chatElement = document.querySelector('#chat');
 
 const renderUsers = (users) => {
+  console.log('users :>> ', users);
+
   userUlElement.innerHTML = '';
   users.forEach((user) => {
     const liElement = document.createElement('li');
+    const buttonElement = document.createElement('button');
     liElement.innerText = user.name;
+    buttonElement.innerText = 'Send';
+
+    liElement.appendChild(buttonElement);
     userUlElement.appendChild(liElement);
   });
 };
@@ -137,3 +143,5 @@ socket.on('welcome-message', (data) => {});
 socket.on('on-clients-changed', renderUsers);
 
 socket.on('on-message', renderMessages);
+
+socket.on('private-message', renderMessages);

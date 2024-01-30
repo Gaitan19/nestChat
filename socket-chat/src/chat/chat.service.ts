@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 interface Client {
   id: string;
   name: string;
+  socketId: string;
 }
 
 @Injectable()
