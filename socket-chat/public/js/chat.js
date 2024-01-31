@@ -45,6 +45,10 @@ const renderUsers = (users) => {
 
       buttonElement.addEventListener('click', () => {
         showChatDiv();
+        getMessagePrivados({
+          users: [infoUser.email, user.name],
+          messageFor: user.name,
+        });
         form.dataset.socket_id = user.socketId;
         form.dataset.user_email = user.name;
         chatName.innerHTML = user.name;
@@ -127,7 +131,6 @@ renderMessagesUser = (payload) => {
 };
 
 const getUserMessages = async () => {
-  const activeUsers = [...users];
   const response = await fetch('http://localhost:3000/users', {
     method: 'GET',
     headers: {
@@ -136,20 +139,74 @@ const getUserMessages = async () => {
   })
     .then((response) => response.json())
     .then((res) => res);
-  response.chats.forEach((chat) => {
-    if (!chat.isPrivate) {
-      renderMessagesUser({
-        id: response.id,
-        message: chat.message,
-        name: response.email,
-      });
-    }
+
+  console.log(response);
+
+  response.forEach((user) => {
+    user.chats.forEach((chat) => {
+      if (!chat.isPrivate) {
+        renderMessagesUser({
+          id: user.id,
+          message: chat.message,
+          name: user.email,
+        });
+      }
+    });
   });
+  // response.chats.forEach((chat) => {
+  //   if (!chat.isPrivate) {
+  //     renderMessagesUser({
+  //       id: response.id,
+  //       message: chat.message,
+  //       name: response.email,
+  //     });
+  //   }
+  // });
 
   // activeUsers.forEach(async (user) => {
 
   //   if (response.chats.length > 0)
   // });
+};
+
+const getMessagePrivados = async (payload) => {
+  const { users, messageFor } = payload;
+  console.log('usersPrivate :>> ', users);
+
+  users.forEach(async (userPriv) => {
+    const response = await fetch('http://localhost:3000/users/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+
+      body: JSON.stringify({
+        email: userPriv,
+      }),
+    })
+      .then((response) => response.json())
+      .then((res) => res);
+    console.log('userPriv :>> ', userPriv);
+    console.log('response1 :>> ', response);
+    response.chats.forEach((chat) => {
+      console.log('chatPriv :>> ', userPriv);
+      console.log('messageFor :>> ', messageFor);
+      console.log('chatPrivMessages :>> ', chat);
+
+      const { id, email } = response;
+
+      if (
+        (chat.messageFor === messageFor && chat.messageFrom === userPriv) ||
+        (chat.messageFor === userPriv && chat.messageFrom === email)
+      ) {
+        renderMessagesUser({
+          id,
+          message: chat.message,
+          name: email,
+        });
+      }
+    });
+  });
 };
 
 const saveMessages = async (payload) => {
@@ -166,6 +223,7 @@ const saveMessages = async (payload) => {
         message: message,
         isPrivate: true,
         messageFor,
+        messageFrom: infoUser.email,
       }),
     })
       .then((response) => response.json())

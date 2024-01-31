@@ -14,6 +14,8 @@ export class Chat {
 
   @Column({ default: 'grupo' })
   messageFor: string;
+  @Column({ default: 'grupo' })
+  messageFrom: string;
 
   @ManyToOne(() => User, (user) => user.chats)
   user: User;

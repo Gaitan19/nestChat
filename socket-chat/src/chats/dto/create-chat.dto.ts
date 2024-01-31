@@ -14,4 +14,8 @@ export class CreateChatDto {
   @IsOptional()
   @IsString()
   messageFor: string;
+
+  @IsOptional()
+  @IsString()
+  messageFrom: string;
 }
