@@ -9,6 +9,12 @@ export class Chat {
   @Column()
   message: string;
 
+  @Column({ default: false })
+  isPrivate: boolean;
+
+  @Column({ default: 'grupo' })
+  messageFor: string;
+
   @ManyToOne(() => User, (user) => user.chats)
   user: User;
 }
