@@ -30,9 +30,6 @@ const showChatDiv = () => {
 };
 
 const renderUsers = (users) => {
-  console.log('users :>> ', users);
-  console.log('infoUser :>> ', infoUser);
-
   userUlElement.innerHTML = '';
   users.forEach((user) => {
     if (user.name !== infoUser.email) {
@@ -68,7 +65,6 @@ const renderUsers = (users) => {
 
 renderMessages = (payload) => {
   const { userId, message, name, isPrivate } = payload;
-  console.log('ser envio un message :>> ', payload);
 
   const chatSocketId = form.getAttribute('data-socket_id');
   if (chatSocketId) {
@@ -92,7 +88,6 @@ renderMessages = (payload) => {
 
 renderMessagesPrivados = (payload) => {
   const { userId, message, name, isPrivate } = payload;
-  console.log('ser envio un message :>> ', payload);
 
   const chatSocketId = form.getAttribute('data-socket_id');
   if (!chatSocketId && !isPrivate) {
@@ -131,7 +126,9 @@ renderMessagesUser = (payload) => {
 };
 
 const getUserMessages = async () => {
-  const response = await fetch('http://localhost:3000/users', {
+  let userMessages;
+
+  const response = await fetch('http://localhost:3000/chats', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
@@ -140,33 +137,17 @@ const getUserMessages = async () => {
     .then((response) => response.json())
     .then((res) => res);
 
-  console.log(response);
+  userMessages = response
+    .sort((a, b) => a.id - b.id)
+    .filter((userMessage) => !userMessage.isPrivate);
 
-  response.forEach((user) => {
-    user.chats.forEach((chat) => {
-      if (!chat.isPrivate) {
-        renderMessagesUser({
-          id: user.id,
-          message: chat.message,
-          name: user.email,
-        });
-      }
+  userMessages.forEach((chat) => {
+    renderMessagesUser({
+      id: chat.user.id,
+      message: chat.message,
+      name: chat.user.email,
     });
   });
-  // response.chats.forEach((chat) => {
-  //   if (!chat.isPrivate) {
-  //     renderMessagesUser({
-  //       id: response.id,
-  //       message: chat.message,
-  //       name: response.email,
-  //     });
-  //   }
-  // });
-
-  // activeUsers.forEach(async (user) => {
-
-  //   if (response.chats.length > 0)
-  // });
 };
 
 const getMessagePrivados = async (payload) => {
@@ -183,8 +164,6 @@ const getMessagePrivados = async (payload) => {
     .then((response) => response.json())
     .then((res) => res);
 
-  console.log(users);
-
   userMessages = response
     .sort((a, b) => a.id - b.id)
     .filter((userMessage) => {
@@ -197,7 +176,6 @@ const getMessagePrivados = async (payload) => {
     });
 
   userMessages.forEach((chat) => {
-    console.log('chat :>> ', chat);
     if (
       (chat.messageFor === users[0] && chat.messageFrom === users[1]) ||
       (chat.messageFor === users[1] && chat.messageFrom === users[0])
@@ -209,37 +187,6 @@ const getMessagePrivados = async (payload) => {
       });
     }
   });
-
-  // users.forEach(async (userPriv) => {
-  //   const response = await fetch('http://localhost:3000/users/email', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json;charset=utf-8',
-  //     },
-
-  //     body: JSON.stringify({
-  //       email: userPriv,
-  //     }),
-  //   })
-  //     .then((response) => response.json())
-  //     .then((res) => res);
-  //   console.log('userPriv :>> ', userPriv);
-  //   console.log('response1 :>> ', response.chats);
-  //   response.chats.forEach((chat) => {
-  //     const { id, email } = response;
-
-  //     if (
-  //       (chat.messageFor === users[0] && chat.messageFrom === users[1]) ||
-  //       (chat.messageFor === users[1] && chat.messageFrom === users[0])
-  //     ) {
-  //       renderMessagesUser({
-  //         id,
-  //         message: chat.message,
-  //         name: email,
-  //       });
-  //     }
-  //   });
-  // });
 };
 
 const saveMessages = async (payload) => {
@@ -287,7 +234,6 @@ form.addEventListener('submit', async (event) => {
   const messageFor = form.getAttribute('data-user_email');
 
   if (chatSocketId) {
-    // console.log(socket.emit('private-message', { message, to: chatSocketId }))
     saveMessages({ isPrivate: true, message, messageFor });
     socket.emit('private-message', { message, to: chatSocketId });
     renderMessagesPrivados({
