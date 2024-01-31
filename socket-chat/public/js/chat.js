@@ -171,42 +171,75 @@ const getUserMessages = async () => {
 
 const getMessagePrivados = async (payload) => {
   const { users, messageFor } = payload;
-  console.log('usersPrivate :>> ', users);
 
-  users.forEach(async (userPriv) => {
-    const response = await fetch('http://localhost:3000/users/email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8',
-      },
+  let userMessages;
 
-      body: JSON.stringify({
-        email: userPriv,
-      }),
-    })
-      .then((response) => response.json())
-      .then((res) => res);
-    console.log('userPriv :>> ', userPriv);
-    console.log('response1 :>> ', response);
-    response.chats.forEach((chat) => {
-      console.log('chatPriv :>> ', userPriv);
-      console.log('messageFor :>> ', messageFor);
-      console.log('chatPrivMessages :>> ', chat);
+  const response = await fetch('http://localhost:3000/chats', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+  })
+    .then((response) => response.json())
+    .then((res) => res);
 
-      const { id, email } = response;
+  console.log(users);
 
+  userMessages = response
+    .sort((a, b) => a.id - b.id)
+    .filter((userMessage) => {
       if (
-        (chat.messageFor === messageFor && chat.messageFrom === userPriv) ||
-        (chat.messageFor === userPriv && chat.messageFrom === email)
+        userMessage.user.email === users[0] ||
+        userMessage.user.email === users[1]
       ) {
-        renderMessagesUser({
-          id,
-          message: chat.message,
-          name: email,
-        });
+        return userMessage;
       }
     });
+
+  userMessages.forEach((chat) => {
+    console.log('chat :>> ', chat);
+    if (
+      (chat.messageFor === users[0] && chat.messageFrom === users[1]) ||
+      (chat.messageFor === users[1] && chat.messageFrom === users[0])
+    ) {
+      renderMessagesUser({
+        id: chat.user.id,
+        message: chat.message,
+        name: chat.user.email,
+      });
+    }
   });
+
+  // users.forEach(async (userPriv) => {
+  //   const response = await fetch('http://localhost:3000/users/email', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json;charset=utf-8',
+  //     },
+
+  //     body: JSON.stringify({
+  //       email: userPriv,
+  //     }),
+  //   })
+  //     .then((response) => response.json())
+  //     .then((res) => res);
+  //   console.log('userPriv :>> ', userPriv);
+  //   console.log('response1 :>> ', response.chats);
+  //   response.chats.forEach((chat) => {
+  //     const { id, email } = response;
+
+  //     if (
+  //       (chat.messageFor === users[0] && chat.messageFrom === users[1]) ||
+  //       (chat.messageFor === users[1] && chat.messageFrom === users[0])
+  //     ) {
+  //       renderMessagesUser({
+  //         id,
+  //         message: chat.message,
+  //         name: email,
+  //       });
+  //     }
+  //   });
+  // });
 };
 
 const saveMessages = async (payload) => {

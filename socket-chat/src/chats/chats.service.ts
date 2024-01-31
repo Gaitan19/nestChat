@@ -31,7 +31,7 @@ export class ChatsService {
   }
 
   findAll() {
-    return this.chatsRepository.find();
+    return this.chatsRepository.find({ relations: ['user'] });
   }
 
   findOne(id: number) {
