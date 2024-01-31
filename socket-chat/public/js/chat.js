@@ -56,7 +56,7 @@ const renderUsers = (users) => {
   });
 
   chatGrupalButton.addEventListener('click', () => {
-    getUserMessages(users);
+    getUserMessages();
     chatName.innerHTML = 'SMBS';
     showChatDiv();
   });
@@ -126,55 +126,78 @@ renderMessagesUser = (payload) => {
   chatElement.scrollTop = chatElement.scrollHeight;
 };
 
-function getUserMessages(users) {
+const getUserMessages = async () => {
   const activeUsers = [...users];
-  activeUsers.forEach(async (user) => {
-    const response = await fetch('http://localhost:3000/users/email', {
+  const response = await fetch('http://localhost:3000/users', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+  })
+    .then((response) => response.json())
+    .then((res) => res);
+  response.chats.forEach((chat) => {
+    if (!chat.isPrivate) {
+      renderMessagesUser({
+        id: response.id,
+        message: chat.message,
+        name: response.email,
+      });
+    }
+  });
+
+  // activeUsers.forEach(async (user) => {
+
+  //   if (response.chats.length > 0)
+  // });
+};
+
+const saveMessages = async (payload) => {
+  const { message, isPrivate, messageFor } = payload;
+  if (isPrivate) {
+    const response = await fetch('http://localhost:3000/chats', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json;charset=utf-8',
       },
 
       body: JSON.stringify({
-        email: user.name,
+        email: infoUser.email,
+        message: message,
+        isPrivate: true,
+        messageFor,
       }),
     })
       .then((response) => response.json())
       .then((res) => res);
+  } else {
+    const response = await fetch('http://localhost:3000/chats', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
 
-    if (response.chats.length > 0)
-      response.chats.forEach((chat) => {
-        renderMessagesUser({
-          id: response.id,
-          message: chat.message,
-          name: response.email,
-        });
-      });
-  });
-}
+      body: JSON.stringify({
+        email: infoUser.email,
+        message: message,
+      }),
+    })
+      .then((response) => response.json())
+      .then((res) => res);
+  }
+};
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const message = input.value;
 
-  // const response = await fetch('http://localhost:3000/chats', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json;charset=utf-8',
-  //   },
-
-  //   body: JSON.stringify({
-  //     email: infoUser.email,
-  //     message: message,
-  //   }),
-  // })
-  //   .then((response) => response.json())
-  //   .then((res) => res);
-
   input.value = '';
   const chatSocketId = form.getAttribute('data-socket_id');
+  const messageFor = form.getAttribute('data-user_email');
+
   if (chatSocketId) {
     // console.log(socket.emit('private-message', { message, to: chatSocketId }))
+    saveMessages({ isPrivate: true, message, messageFor });
     socket.emit('private-message', { message, to: chatSocketId });
     renderMessagesPrivados({
       userId: infoUser.id,
@@ -183,6 +206,7 @@ form.addEventListener('submit', async (event) => {
       isPrivate: true,
     });
   } else {
+    await saveMessages({ message });
     socket.emit('send-message', message);
   }
 });
