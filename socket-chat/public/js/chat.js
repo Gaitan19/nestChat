@@ -13,15 +13,13 @@ const userUlElement = document.querySelector('ul');
 form = document.querySelector('form');
 input = document.querySelector('input');
 chatElement = document.querySelector('#chat');
-chatContainer = document.querySelector('#chatContainer')
-chatGrupalButton = document.querySelector('.chat-grupal')
-chatName = document.querySelector('#chat-name')
-meProfile = document.querySelector('#me-profile')
-meProfile.innerHTML = `Me:${infoUser.email}`
-
+chatContainer = document.querySelector('#chatContainer');
+chatGrupalButton = document.querySelector('.chat-grupal');
+chatName = document.querySelector('#chat-name');
+meProfile = document.querySelector('#me-profile');
+meProfile.innerHTML = `Me:${infoUser.email}`;
 
 const showChatDiv = () => {
-
   const messageDivs = chatContainer.getElementsByClassName('message');
   chatContainer.style.visibility = 'hidden';
   while (messageDivs.length > 0) {
@@ -30,9 +28,6 @@ const showChatDiv = () => {
 
   chatContainer.style.visibility = 'visible';
 };
-
-
-
 
 const renderUsers = (users) => {
   console.log('users :>> ', users);
@@ -44,15 +39,15 @@ const renderUsers = (users) => {
       const liElement = document.createElement('li');
       liElement.classList.add('chat-item');
       const buttonElement = document.createElement('button');
-      buttonElement.classList.add('chat-button')
+      buttonElement.classList.add('chat-button');
       liElement.innerText = user.name;
       buttonElement.innerText = 'Send';
 
       buttonElement.addEventListener('click', () => {
         showChatDiv();
-        form.dataset.socket_id = user.socketId
-        form.dataset.user_email = user.name
-        chatName.innerHTML = user.name
+        form.dataset.socket_id = user.socketId;
+        form.dataset.user_email = user.name;
+        chatName.innerHTML = user.name;
       });
 
       liElement.appendChild(buttonElement);
@@ -61,20 +56,49 @@ const renderUsers = (users) => {
   });
 
   chatGrupalButton.addEventListener('click', () => {
-    getUserMessages(users)
-    chatName.innerHTML = "SMBS"
+    getUserMessages(users);
+    chatName.innerHTML = 'SMBS';
     showChatDiv();
   });
 };
 
 renderMessages = (payload) => {
-  const { userId, message, name } = payload;
-  console.log('payload :>> ', payload);
+  const { userId, message, name, isPrivate } = payload;
+  console.log('ser envio un message :>> ', payload);
+
+  const chatSocketId = form.getAttribute('data-socket_id');
+  if (chatSocketId) {
+    return;
+  }
 
   const divElement = document.createElement('div');
   divElement.classList.add('message');
 
   if (userId !== socket.id) {
+    divElement.classList.add('incoming');
+  }
+
+  divElement.innerHTML = `
+  <small>${name}</small>
+  <p>${message}</p>
+  `;
+  chatElement.appendChild(divElement);
+  chatElement.scrollTop = chatElement.scrollHeight;
+};
+
+renderMessagesPrivados = (payload) => {
+  const { userId, message, name, isPrivate } = payload;
+  console.log('ser envio un message :>> ', payload);
+
+  const chatSocketId = form.getAttribute('data-socket_id');
+  if (!chatSocketId && !isPrivate) {
+    return;
+  }
+
+  const divElement = document.createElement('div');
+  divElement.classList.add('message');
+
+  if (infoUser.email !== payload.name) {
     divElement.classList.add('incoming');
   }
 
@@ -129,13 +153,9 @@ function getUserMessages(users) {
   });
 }
 
-
-
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const message = input.value;
-
-
 
   // const response = await fetch('http://localhost:3000/chats', {
   //   method: 'POST',
@@ -152,13 +172,17 @@ form.addEventListener('submit', async (event) => {
   //   .then((res) => res);
 
   input.value = '';
-  const chatSocketId = form.getAttribute('data-socket_id')
+  const chatSocketId = form.getAttribute('data-socket_id');
   if (chatSocketId) {
     // console.log(socket.emit('private-message', { message, to: chatSocketId }))
     socket.emit('private-message', { message, to: chatSocketId });
-    // console.log('form.data-socket_id :>> ', chatSocketId);
+    renderMessagesPrivados({
+      userId: infoUser.id,
+      message,
+      name: infoUser.email,
+      isPrivate: true,
+    });
   } else {
-
     socket.emit('send-message', message);
   }
 });
@@ -183,12 +207,10 @@ socket.on('disconnect', () => {
   lblStatusOffline.classList.remove('hidden');
 });
 
-socket.on('welcome-message', (data) => { });
+socket.on('welcome-message', (data) => {});
 
 socket.on('on-clients-changed', renderUsers);
 
 socket.on('on-message', renderMessages);
 
-socket.on('private-message', (payload) => {
-  console.log('payload :>> ', payload);
-});
+socket.on('private-message', renderMessagesPrivados);

@@ -71,6 +71,7 @@ export class ChatGateway implements OnModuleInit {
       userId: client.id,
       message: message,
       name: name,
+      isPrivate: true,
     });
   }
 }
