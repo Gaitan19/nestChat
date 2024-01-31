@@ -13,24 +13,63 @@ const userUlElement = document.querySelector('ul');
 form = document.querySelector('form');
 input = document.querySelector('input');
 chatElement = document.querySelector('#chat');
+chatContainer = document.querySelector('#chatContainer')
+chatGrupalButton = document.querySelector('.chat-grupal')
+chatName = document.querySelector('#chat-name')
+meProfile = document.querySelector('#me-profile')
+meProfile.innerHTML = `Me:${infoUser.email}`
+
+
+const showChatDiv = () => {
+
+  const messageDivs = chatContainer.getElementsByClassName('message');
+  chatContainer.style.visibility = 'hidden';
+  while (messageDivs.length > 0) {
+    messageDivs[0].remove();
+  }
+
+  chatContainer.style.visibility = 'visible';
+};
+
+
+
 
 const renderUsers = (users) => {
   console.log('users :>> ', users);
+  console.log('infoUser :>> ', infoUser);
 
   userUlElement.innerHTML = '';
   users.forEach((user) => {
-    const liElement = document.createElement('li');
-    const buttonElement = document.createElement('button');
-    liElement.innerText = user.name;
-    buttonElement.innerText = 'Send';
+    if (user.name !== infoUser.email) {
+      const liElement = document.createElement('li');
+      liElement.classList.add('chat-item');
+      const buttonElement = document.createElement('button');
+      buttonElement.classList.add('chat-button')
+      liElement.innerText = user.name;
+      buttonElement.innerText = 'Send';
 
-    liElement.appendChild(buttonElement);
-    userUlElement.appendChild(liElement);
+      buttonElement.addEventListener('click', () => {
+        showChatDiv();
+        form.dataset.socket_id = user.socketId
+        form.dataset.user_email = user.name
+        chatName.innerHTML = user.name
+      });
+
+      liElement.appendChild(buttonElement);
+      userUlElement.appendChild(liElement);
+    }
+  });
+
+  chatGrupalButton.addEventListener('click', () => {
+    getUserMessages(users)
+    chatName.innerHTML = "SMBS"
+    showChatDiv();
   });
 };
 
 renderMessages = (payload) => {
   const { userId, message, name } = payload;
+  console.log('payload :>> ', payload);
 
   const divElement = document.createElement('div');
   divElement.classList.add('message');
@@ -90,32 +129,38 @@ function getUserMessages(users) {
   });
 }
 
-window.addEventListener('load', () => {
-  socket.on('on-clients-changed', getUserMessages);
-});
 
-window.removeEventListener('load', getUserMessages);
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const message = input.value;
 
-  const response = await fetch('http://localhost:3000/chats', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json;charset=utf-8',
-    },
 
-    body: JSON.stringify({
-      email: infoUser.email,
-      message: message,
-    }),
-  })
-    .then((response) => response.json())
-    .then((res) => res);
+
+  // const response = await fetch('http://localhost:3000/chats', {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json;charset=utf-8',
+  //   },
+
+  //   body: JSON.stringify({
+  //     email: infoUser.email,
+  //     message: message,
+  //   }),
+  // })
+  //   .then((response) => response.json())
+  //   .then((res) => res);
 
   input.value = '';
-  socket.emit('send-message', message);
+  const chatSocketId = form.getAttribute('data-socket_id')
+  if (chatSocketId) {
+    // console.log(socket.emit('private-message', { message, to: chatSocketId }))
+    socket.emit('private-message', { message, to: chatSocketId });
+    // console.log('form.data-socket_id :>> ', chatSocketId);
+  } else {
+
+    socket.emit('send-message', message);
+  }
 });
 
 // ------------------------------------
@@ -138,10 +183,12 @@ socket.on('disconnect', () => {
   lblStatusOffline.classList.remove('hidden');
 });
 
-socket.on('welcome-message', (data) => {});
+socket.on('welcome-message', (data) => { });
 
 socket.on('on-clients-changed', renderUsers);
 
 socket.on('on-message', renderMessages);
 
-socket.on('private-message', renderMessages);
+socket.on('private-message', (payload) => {
+  console.log('payload :>> ', payload);
+});

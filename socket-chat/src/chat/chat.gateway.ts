@@ -65,6 +65,7 @@ export class ChatGateway implements OnModuleInit {
     if (!message) {
       return;
     }
+    console.log({ message, to });
 
     client.to(to).emit('private-message', {
       userId: client.id,
