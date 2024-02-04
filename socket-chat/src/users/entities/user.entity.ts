@@ -1,5 +1,6 @@
 import { Chat } from 'src/chats/entities/chat.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Room } from 'src/rooms/entities/room.entity';
+import { Column, Entity, ManyToMany, OneToMany } from 'typeorm';
 
 @Entity()
 export class User {
