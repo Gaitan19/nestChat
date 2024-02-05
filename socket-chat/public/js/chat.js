@@ -9,12 +9,12 @@ const lblStatusOnline = document.querySelector('#status-online');
 const lblStatusOffline = document.querySelector('#status-offline');
 
 const userUlElement = document.querySelector('ul');
-const inputRoom = document.querySelector('.input-room')
-const btnCreateRoom = document.querySelector('#createRoom')
-const btnJoinRoom = document.querySelector('#joinRoom')
+const inputRoom = document.querySelector('.input-room');
+const btnCreateRoom = document.querySelector('#createRoom');
+const btnJoinRoom = document.querySelector('#joinRoom');
+const btnOut = document.querySelector('.button-out');
 
-const roomsList = document.querySelector('.rooms-list')
-
+const roomsList = document.querySelector('.rooms-list');
 
 form = document.querySelector('form');
 input = document.querySelector('.input-form');
@@ -29,11 +29,24 @@ meProfile.innerHTML = `Me:${infoUser.email}`;
 
 // create room
 btnCreateRoom.addEventListener('click', async () => {
-  const roomName = inputRoom.value
+  const roomName = inputRoom.value;
   if (roomName.length < 1) {
-    return
+    return;
   }
 
+  const rooms = await fetch('http://localhost:3000/rooms', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+  })
+    .then((response) => response.json())
+    .then((res) => res);
+
+  const existRoom = rooms.filter((room) => room.roomName === roomName);
+  if (existRoom.length > 0) {
+    return alert('Room already exists');
+  }
 
   const response = await fetch('http://localhost:3000/rooms', {
     method: 'POST',
@@ -41,30 +54,32 @@ btnCreateRoom.addEventListener('click', async () => {
       'Content-Type': 'application/json;charset=utf-8',
     },
     body: JSON.stringify({
-      roomName: roomName
+      roomName: roomName,
     }),
   })
     .then((response) => response.json())
     .then((res) => res);
 
-
-  // console.log('response :>> ', response);
-  await alert('Room created succesfully')
-  inputRoom.value = ""
-})
+  await alert('Room created succesfully');
+  inputRoom.value = '';
+});
 
 // join room
 btnJoinRoom.addEventListener('click', async () => {
-  const roomName = inputRoom.value
+  const roomName = inputRoom.value;
   if (roomName.length < 1) {
-    return
+    return;
   }
 
-  socket.emit('join-room', { roomName, user: socket.id, email: infoUser.email });
+  socket.emit('join-room', {
+    roomName,
+    user: socket.id,
+    email: infoUser.email,
+  });
 
-  await alert('User Joined succesfully')
-  inputRoom.value = ""
-})
+  await alert('User Joined succesfully');
+  inputRoom.value = '';
+});
 // final of logic rooms_____________________________________
 
 const showChatDiv = () => {
@@ -73,36 +88,72 @@ const showChatDiv = () => {
   while (messageDivs.length > 0) {
     messageDivs[0].remove();
   }
+  btnOut.style.visibility = 'hidden';
 
   chatContainer.style.visibility = 'visible';
 };
 
-const renderRoom = (payload) => {
-  const { room } = payload
-  roomsList.innerHTML = '';
-  const liElement = document.createElement('li')
-  liElement.classList.add('chat-item');
-  const buttonElement = document.createElement('button');
-  buttonElement.classList.add('chat-button');
-  liElement.innerText = room.roomName;
-  buttonElement.innerText = 'Send';
+const getRooms = async () => {
+  const rooms = await fetch('http://localhost:3000/rooms', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+  })
+    .then((response) => response.json())
+    .then((res) => res);
 
-
-
-  buttonElement.addEventListener('click', () => {
-    showChatDiv();
-
-    // form.dataset.socket_id = user.socketId;
-    // form.dataset.user_email = user.name;
-    form.dataset.room_name = room.roomName;
-
-    chatName.innerHTML = room.roomName;
+  rooms.forEach((room) => {
+    const usersInRooms = room.userRooms.map((user) => user.email);
+    if (usersInRooms.includes(infoUser.email)) {
+      socket.emit('join-room', {
+        roomName: room.roomName,
+        user: socket.id,
+        email: infoUser.email,
+      });
+    }
   });
+};
 
-  liElement.appendChild(buttonElement);
-  userUlElement.appendChild(liElement);
+window.addEventListener('load', async () => {
+  await getRooms();
+});
 
-}
+const renderRoom = async (payload) => {
+  // const { room } = payload;
+
+  const rooms = await fetch('http://localhost:3000/rooms', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+  })
+    .then((response) => response.json())
+    .then((res) => res);
+
+  roomsList.innerHTML = '';
+
+  rooms.forEach((room) => {
+    const usersInRooms = room.userRooms.map((user) => user.email);
+    if (usersInRooms.includes(infoUser.email)) {
+      const liElement = document.createElement('li');
+      liElement.classList.add('chat-item');
+      const buttonElement = document.createElement('button');
+      buttonElement.classList.add('chat-button');
+      liElement.innerText = room.roomName;
+      buttonElement.innerText = 'Send';
+      buttonElement.addEventListener('click', () => {
+        showChatDiv();
+        btnOut.style.visibility = 'visible';
+        form.dataset.room_name = room.roomName;
+        chatName.innerHTML = room.roomName;
+        getMessagesRoom({ id: room.id });
+      });
+      liElement.appendChild(buttonElement);
+      roomsList.appendChild(liElement);
+    }
+  });
+};
 
 const renderUsers = (users) => {
   userUlElement.innerHTML = '';
@@ -287,8 +338,32 @@ const getMessagePrivados = async (payload) => {
   });
 };
 
+const getMessagesRoom = async (payload) => {
+  const { id } = payload;
+
+  const room = await fetch(`http://localhost:3000/rooms/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+  })
+    .then((response) => response.json())
+    .then((res) => res);
+
+  const { messages } = room;
+
+  messages.forEach((messageRoom) => {
+    renderMessagesRoom({
+      message: messageRoom.message,
+      name: messageRoom.messageFrom,
+      isPrivate: true,
+    });
+  });
+};
+
 const saveMessages = async (payload) => {
-  const { message, isPrivate, messageFor } = payload;
+  const { message, isPrivate, messageFor, roomName, isLeftRoom } = payload;
+
   if (isPrivate) {
     const response = await fetch('http://localhost:3000/chats', {
       method: 'POST',
@@ -302,6 +377,21 @@ const saveMessages = async (payload) => {
         isPrivate: true,
         messageFor,
         messageFrom: infoUser.email,
+      }),
+    })
+      .then((response) => response.json())
+      .then((res) => res);
+  } else if (roomName) {
+    const response = await fetch('http://localhost:3000/message-rooms', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+
+      body: JSON.stringify({
+        message: message,
+        messageFrom: isLeftRoom ? 'Boot' : infoUser.email,
+        roomName,
       }),
     })
       .then((response) => response.json())
@@ -332,7 +422,6 @@ form.addEventListener('submit', async (event) => {
   const messageFor = form.getAttribute('data-user_email');
   const roomFor = form.getAttribute('data-room_name');
 
-
   if (chatSocketId) {
     saveMessages({ isPrivate: true, message, messageFor });
     socket.emit('private-message', { message, to: chatSocketId });
@@ -343,6 +432,7 @@ form.addEventListener('submit', async (event) => {
       isPrivate: true,
     });
   } else if (roomFor) {
+    saveMessages({ roomName: roomFor, message });
     socket.emit('room-message', { message, to: roomFor });
     renderMessagesRoom({
       userId: infoUser.id,
@@ -355,6 +445,54 @@ form.addEventListener('submit', async (event) => {
     socket.emit('send-message', message);
   }
 });
+
+btnOut.addEventListener('click', () => {
+  const roomName = form.getAttribute('data-room_name');
+  socket.emit('leave-room', { roomName, email: infoUser.email });
+});
+
+const leaveRoom = async (payload) => {
+  const { email, roomName, room, message } = payload;
+
+  if (email !== infoUser.email) {
+    await saveMessages({
+      userId: infoUser.id,
+      message,
+      name: infoUser.email,
+
+      isLeftRoom: true,
+      roomName,
+    });
+  } else {
+    const users = await fetch(`http://localhost:3000/user-rooms`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+    })
+      .then((response) => response.json())
+      .then((res) => res);
+
+    const userDelete = users.filter((user) => {
+      if (user.email === email && room.roomName === user.room.roomName) {
+        return user;
+      }
+    });
+
+    await fetch(`http://localhost:3000/user-rooms/${userDelete[0].id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+    })
+      .then((response) => response.json())
+      .then((res) => res);
+
+    chatContainer.style.visibility = 'hidden';
+    btnOut.style.visibility = 'hidden';
+    await renderRoom();
+  }
+};
 
 // ------------------------------------
 
@@ -376,7 +514,7 @@ socket.on('disconnect', () => {
   lblStatusOffline.classList.remove('hidden');
 });
 
-socket.on('welcome-message', (data) => { });
+socket.on('welcome-message', (data) => {});
 
 socket.on('on-clients-changed', renderUsers);
 
@@ -385,6 +523,6 @@ socket.on('on-message', renderMessages);
 socket.on('private-message', renderMessagesPrivados);
 socket.on('room-message', renderMessagesRoom);
 
-
 socket.on('join-room', renderRoom);
 
+socket.on('leave-room', leaveRoom);

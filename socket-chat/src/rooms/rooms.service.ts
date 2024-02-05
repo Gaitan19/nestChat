@@ -23,8 +23,11 @@ export class RoomsService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} room`;
+  async findOne(id: number) {
+    return await this.roomsRepository.findOne({
+      where: { id },
+      relations: ['userRooms', 'messages'],
+    });
   }
 
   async update(id: number, updateRoomDto: UpdateRoomDto) {

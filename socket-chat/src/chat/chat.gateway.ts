@@ -5,16 +5,13 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { BadRequestException, Logger, OnModuleInit } from '@nestjs/common';
+import { OnModuleInit } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Server, Socket } from 'socket.io';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Room } from 'src/rooms/entities/room.entity';
 import { Repository } from 'typeorm';
 import { UserRoom } from 'src/user-rooms/entities/user-room.entity';
-import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
 
 @WebSocketGateway()
 export class ChatGateway implements OnModuleInit {
@@ -135,6 +132,30 @@ export class ChatGateway implements OnModuleInit {
       userId: client.id,
       message: message,
       name: name,
+      isPrivate: true,
+    });
+  }
+
+  @SubscribeMessage('leave-room')
+  async handleleave(
+    @MessageBody() { roomName, user, email },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.to(roomName).emit('room-message', {
+      userId: client.id,
+      message: `${email} has left the room`,
+      name: 'Boot',
+      isPrivate: true,
+    });
+
+    const room = await this.roomsRepository.findOne({ where: { roomName } });
+
+    this.server.emit('leave-room', {
+      email,
+      roomName,
+      room,
+      message: `${email} has left the room`,
+      name: 'Boot',
       isPrivate: true,
     });
   }

@@ -1,7 +1,11 @@
 @import url("https://fonts.googleapis.com/css?family=Red+Hat+Display:400,500,900&display=swap");
 
-
-.chat-list {
+.button-out {
+  align-self: end;
+  visibility: hidden;
+}
+.chat-list,
+.rooms-list {
   border: 1px solid #ccc;
   border-radius: 5px;
   list-style: none;
@@ -23,7 +27,7 @@
 
 /* Estilos para los botones */
 .chat-button {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   border: none;
   border-radius: 5px;
   color: white;

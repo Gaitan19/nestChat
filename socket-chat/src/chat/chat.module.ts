@@ -9,11 +9,9 @@ import { Room } from 'src/rooms/entities/room.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MessageRoomsModule } from 'src/message-rooms/message-rooms.module';
 import { MessageRoomsService } from 'src/message-rooms/message-rooms.service';
-import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
-    HttpModule,
     TypeOrmModule.forFeature([Room]),
     RoomsModule,
     UserRoomsModule,
