@@ -17,7 +17,7 @@ const roomsList = document.querySelector('.rooms-list')
 
 
 form = document.querySelector('form');
-input = document.querySelector('input');
+input = document.querySelector('.input-form');
 chatElement = document.querySelector('#chat');
 chatContainer = document.querySelector('#chatContainer');
 chatGrupalButton = document.querySelector('.chat-grupal');
@@ -77,11 +77,31 @@ const showChatDiv = () => {
   chatContainer.style.visibility = 'visible';
 };
 
-const renderRooms = (rooms) => {
+const renderRoom = (payload) => {
+  const { room } = payload
   roomsList.innerHTML = '';
-  rooms.forEach((room) => {
+  const liElement = document.createElement('li')
+  liElement.classList.add('chat-item');
+  const buttonElement = document.createElement('button');
+  buttonElement.classList.add('chat-button');
+  liElement.innerText = room.roomName;
+  buttonElement.innerText = 'Send';
 
-  })
+
+
+  buttonElement.addEventListener('click', () => {
+    showChatDiv();
+
+    // form.dataset.socket_id = user.socketId;
+    // form.dataset.user_email = user.name;
+    form.dataset.room_name = room.roomName;
+
+    chatName.innerHTML = room.roomName;
+  });
+
+  liElement.appendChild(buttonElement);
+  userUlElement.appendChild(liElement);
+
 }
 
 const renderUsers = (users) => {
@@ -146,6 +166,29 @@ renderMessagesPrivados = (payload) => {
 
   const chatSocketId = form.getAttribute('data-socket_id');
   if (!chatSocketId && !isPrivate) {
+    return;
+  }
+
+  const divElement = document.createElement('div');
+  divElement.classList.add('message');
+
+  if (infoUser.email !== payload.name) {
+    divElement.classList.add('incoming');
+  }
+
+  divElement.innerHTML = `
+  <small>${name}</small>
+  <p>${message}</p>
+  `;
+  chatElement.appendChild(divElement);
+  chatElement.scrollTop = chatElement.scrollHeight;
+};
+
+renderMessagesRoom = (payload) => {
+  const { userId, message, name, isPrivate } = payload;
+
+  const roomName = form.getAttribute('data-room_name');
+  if (!roomName && !isPrivate) {
     return;
   }
 
@@ -287,11 +330,21 @@ form.addEventListener('submit', async (event) => {
   input.value = '';
   const chatSocketId = form.getAttribute('data-socket_id');
   const messageFor = form.getAttribute('data-user_email');
+  const roomFor = form.getAttribute('data-room_name');
+
 
   if (chatSocketId) {
     saveMessages({ isPrivate: true, message, messageFor });
     socket.emit('private-message', { message, to: chatSocketId });
     renderMessagesPrivados({
+      userId: infoUser.id,
+      message,
+      name: infoUser.email,
+      isPrivate: true,
+    });
+  } else if (roomFor) {
+    socket.emit('room-message', { message, to: roomFor });
+    renderMessagesRoom({
       userId: infoUser.id,
       message,
       name: infoUser.email,
@@ -330,9 +383,8 @@ socket.on('on-clients-changed', renderUsers);
 socket.on('on-message', renderMessages);
 
 socket.on('private-message', renderMessagesPrivados);
+socket.on('room-message', renderMessagesRoom);
 
-socket.on('join-room', (data) => {
-  console.log('data :>> ', data);
-  console.log(' se unio alguien:>> ');
-});
+
+socket.on('join-room', renderRoom);
 

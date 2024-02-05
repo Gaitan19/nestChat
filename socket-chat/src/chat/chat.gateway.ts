@@ -115,12 +115,27 @@ export class ChatGateway implements OnModuleInit {
       await this.userRoomRepository.save(newUserRoom);
     }
 
-    const rooms = await this.roomsRepository.find({
-      relations: ['userRooms', 'messages'],
-    });
-
     this.server.emit('join-room', {
-      rooms,
+      room,
+    });
+  }
+
+  @SubscribeMessage('room-message')
+  handleMessageRoom(
+    @MessageBody() { message, to },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { name, token } = client.handshake.auth;
+    if (!message) {
+      return;
+    }
+    console.log({ message, to });
+
+    client.to(to).emit('room-message', {
+      userId: client.id,
+      message: message,
+      name: name,
+      isPrivate: true,
     });
   }
 }
