@@ -112,6 +112,15 @@ export class ChatGateway implements OnModuleInit {
       await this.userRoomRepository.save(newUserRoom);
     }
 
+    client.to(roomName).emit('room-message', {
+      userId: client.id,
+      message: `${email} has joined the room`,
+      name: 'Boot',
+      isJoin: true,
+      isPrivate: true,
+      roomN: roomName,
+    });
+
     this.server.emit('join-room', {
       room,
     });
@@ -145,7 +154,7 @@ export class ChatGateway implements OnModuleInit {
       userId: client.id,
       message: `${email} has left the room`,
       name: 'Boot',
-      isPrivate: true,
+      isJoin: true,
     });
 
     const room = await this.roomsRepository.findOne({ where: { roomName } });

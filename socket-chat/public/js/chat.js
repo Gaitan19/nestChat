@@ -235,8 +235,8 @@ renderMessagesPrivados = (payload) => {
   chatElement.scrollTop = chatElement.scrollHeight;
 };
 
-renderMessagesRoom = (payload) => {
-  const { userId, message, name, isPrivate } = payload;
+renderMessagesRoom = async (payload) => {
+  const { userId, message, name, isPrivate, isJoin, roomN } = payload;
 
   const roomName = form.getAttribute('data-room_name');
   if (!roomName && !isPrivate) {
@@ -256,6 +256,16 @@ renderMessagesRoom = (payload) => {
   `;
   chatElement.appendChild(divElement);
   chatElement.scrollTop = chatElement.scrollHeight;
+
+  if (isJoin) {
+    await saveMessages({
+      userId: infoUser.id,
+      message,
+      name,
+      isLeftRoom: true,
+      roomName: roomN,
+    });
+  }
 };
 
 renderMessagesUser = (payload) => {
