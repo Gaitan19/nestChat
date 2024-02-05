@@ -9,6 +9,12 @@ const lblStatusOnline = document.querySelector('#status-online');
 const lblStatusOffline = document.querySelector('#status-offline');
 
 const userUlElement = document.querySelector('ul');
+const inputRoom = document.querySelector('.input-room')
+const btnCreateRoom = document.querySelector('#createRoom')
+const btnJoinRoom = document.querySelector('#joinRoom')
+
+const roomsList = document.querySelector('.rooms-list')
+
 
 form = document.querySelector('form');
 input = document.querySelector('input');
@@ -19,6 +25,48 @@ chatName = document.querySelector('#chat-name');
 meProfile = document.querySelector('#me-profile');
 meProfile.innerHTML = `Me:${infoUser.email}`;
 
+// logic to rooms___________________________________________
+
+// create room
+btnCreateRoom.addEventListener('click', async () => {
+  const roomName = inputRoom.value
+  if (roomName.length < 1) {
+    return
+  }
+
+
+  const response = await fetch('http://localhost:3000/rooms', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+    body: JSON.stringify({
+      roomName: roomName
+    }),
+  })
+    .then((response) => response.json())
+    .then((res) => res);
+
+
+  // console.log('response :>> ', response);
+  await alert('Room created succesfully')
+  inputRoom.value = ""
+})
+
+// join room
+btnJoinRoom.addEventListener('click', async () => {
+  const roomName = inputRoom.value
+  if (roomName.length < 1) {
+    return
+  }
+
+  socket.emit('join-room', { roomName, user: socket.id, email: infoUser.email });
+
+  await alert('User Joined succesfully')
+  inputRoom.value = ""
+})
+// final of logic rooms_____________________________________
+
 const showChatDiv = () => {
   const messageDivs = chatContainer.getElementsByClassName('message');
   chatContainer.style.visibility = 'hidden';
@@ -28,6 +76,13 @@ const showChatDiv = () => {
 
   chatContainer.style.visibility = 'visible';
 };
+
+const renderRooms = (rooms) => {
+  roomsList.innerHTML = '';
+  rooms.forEach((room) => {
+
+  })
+}
 
 const renderUsers = (users) => {
   userUlElement.innerHTML = '';
@@ -268,10 +323,16 @@ socket.on('disconnect', () => {
   lblStatusOffline.classList.remove('hidden');
 });
 
-socket.on('welcome-message', (data) => {});
+socket.on('welcome-message', (data) => { });
 
 socket.on('on-clients-changed', renderUsers);
 
 socket.on('on-message', renderMessages);
 
 socket.on('private-message', renderMessagesPrivados);
+
+socket.on('join-room', (data) => {
+  console.log('data :>> ', data);
+  console.log(' se unio alguien:>> ');
+});
+

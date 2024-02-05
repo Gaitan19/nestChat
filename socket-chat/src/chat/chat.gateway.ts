@@ -5,16 +5,28 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Logger, OnModuleInit } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Server, Socket } from 'socket.io';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Room } from 'src/rooms/entities/room.entity';
+import { Repository } from 'typeorm';
+import { UserRoom } from 'src/user-rooms/entities/user-room.entity';
+import { HttpService } from '@nestjs/axios';
+import { catchError, firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
 
 @WebSocketGateway()
 export class ChatGateway implements OnModuleInit {
   @WebSocketServer()
   public server: Server;
-
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    @InjectRepository(Room)
+    private roomsRepository: Repository<Room>,
+    @InjectRepository(UserRoom)
+    private userRoomRepository: Repository<UserRoom>,
+    private readonly chatService: ChatService,
+  ) {}
 
   onModuleInit() {
     this.server.on('connection', (socket: Socket) => {
@@ -72,6 +84,43 @@ export class ChatGateway implements OnModuleInit {
       message: message,
       name: name,
       isPrivate: true,
+    });
+  }
+
+  @SubscribeMessage('join-room')
+  async handleJoin(
+    @MessageBody() { roomName, user, email },
+    @ConnectedSocket() client: Socket,
+  ) {
+    if (!roomName) {
+      return;
+    }
+
+    const room = await this.roomsRepository.findOne({ where: { roomName } });
+
+    if (!room) {
+      return;
+    }
+
+    client.join(roomName);
+
+    const users = await this.userRoomRepository.find({ where: { room } });
+
+    const usersInRoom = users.map((user) => user.email);
+    if (!usersInRoom.includes(email)) {
+      const newUserRoom = await this.userRoomRepository.create({
+        email,
+        room,
+      });
+      await this.userRoomRepository.save(newUserRoom);
+    }
+
+    const rooms = await this.roomsRepository.find({
+      relations: ['userRooms', 'messages'],
+    });
+
+    this.server.emit('join-room', {
+      rooms,
     });
   }
 }
