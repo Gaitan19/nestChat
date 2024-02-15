@@ -145,13 +145,35 @@ module.exports = {
 					}
 				);
 
-				console.log("doc :>> ", doc);
 				const json = await this.transformDocuments(
 					ctx,
 					ctx.params,
 					doc
 				);
 				await this.entityChanged("updated", json, ctx);
+
+				return json;
+			},
+		},
+
+		delete: {
+			rest: "DELETE /:_id",
+
+			params: {
+				_id: "any",
+			},
+
+			async handler(ctx) {
+				const doc = await this.adapter.removeById(
+					parseInt(ctx.params._id, 10)
+				);
+
+				const json = await this.transformDocuments(
+					ctx,
+					ctx.params,
+					doc
+				);
+				await this.entityChanged("deleted", json, ctx);
 
 				return json;
 			},
