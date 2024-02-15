@@ -1,3 +1,3 @@
-{"name":"iPhone 11 Pro","quantity":25,"price":999,"_id":"RvWh7dz004WIOJU3"}
-{"name":"Huawei P30 Pro","quantity":15,"price":679,"_id":"TC1tSqnrNUN3kVtW"}
-{"name":"Samsung Galaxy S10 Plus","quantity":10,"price":704,"_id":"wo9ETcx7pnGKhTxi"}
+{"_id":2,"name":"iPhone 11 Pro","description":"usado","unitofmeasure":"gm","price":999}
+{"_id":3,"name":"Huawei P30 Pro","description":"de segunda","unitofmeasure":"gm","price":679}
+{"_id":1,"name":"iPhone 13 Pro","description":"usado","unitofmeasure":"gm","price":999}

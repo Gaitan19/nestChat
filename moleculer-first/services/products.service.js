@@ -22,18 +22,15 @@ module.exports = {
 	 */
 	settings: {
 		// Available fields in the responses
-		fields: [
-			"_id",
-			"name",
-			"quantity",
-			"price"
-		],
+		fields: ["_id", "name", "description", "unitofmeasure", "price"],
 
 		// Validator for the `create` & `insert` actions.
 		entityValidator: {
 			name: "string|min:3",
-			price: "number|positive"
-		}
+			description: "string|min:3",
+			unitofmeasure: "string|min:1",
+			price: "number|positive",
+		},
 	},
 
 	/**
@@ -43,14 +40,11 @@ module.exports = {
 		before: {
 			/**
 			 * Register a before hook for the `create` action.
-			 * It sets a default value for the quantity field.
+			 * It sets a default value for the description field.
 			 *
 			 * @param {Context} ctx
 			 */
-			create(ctx) {
-				ctx.params.quantity = 0;
-			}
-		}
+		},
 	},
 
 	/**
@@ -67,46 +61,117 @@ module.exports = {
 		 *  - update
 		 *  - remove
 		 */
-
 		// --- ADDITIONAL ACTIONS ---
 
-		/**
-		 * Increase the quantity of the product item.
-		 */
-		increaseQuantity: {
-			rest: "PUT /:id/quantity/increase",
+		created: {
+			rest: "POST /",
 			params: {
-				id: "string",
-				value: "number|integer|positive"
+				id: "number|integer|positive",
+				name: "string|min:3",
+				description: "string|min:3",
+				unitofmeasure: "string|min:1",
+				price: "number|positive",
 			},
+
 			/** @param {Context} ctx */
 			async handler(ctx) {
-				const doc = await this.adapter.updateById(ctx.params.id, { $inc: { quantity: ctx.params.value } });
-				const json = await this.transformDocuments(ctx, ctx.params, doc);
-				await this.entityChanged("updated", json, ctx);
+				const doc = await this.adapter.create({
+					$inc: {
+						_id: ctx.params.id,
+						name: ctx.params.name,
+						description: ctx.params.description,
+						unitofmeasure: ctx.params.unitofmeasure,
+						price: ctx.params.price,
+					},
+				});
+				const json = await this.transformDocuments(
+					ctx,
+					ctx.params,
+					doc
+				);
+				await this.entityChanged("created", json, ctx);
 
 				return json;
-			}
+			},
 		},
 
-		/**
-		 * Decrease the quantity of the product item.
-		 */
-		decreaseQuantity: {
-			rest: "PUT /:id/quantity/decrease",
+		find: {
+			rest: "GET /:id",
 			params: {
-				id: "string",
-				value: "number|integer|positive"
+				id: "any",
 			},
-			/** @param {Context} ctx  */
+
+			/** @param {Context} ctx */
 			async handler(ctx) {
-				const doc = await this.adapter.updateById(ctx.params.id, { $inc: { quantity: -ctx.params.value } });
-				const json = await this.transformDocuments(ctx, ctx.params, doc);
+				const doc = await this.adapter.findById(
+					parseInt(ctx.params.id, 10)
+				);
+
+				const json = await this.transformDocuments(
+					ctx,
+					ctx.params,
+					doc
+				);
+
+				return json;
+			},
+		},
+
+		update: {
+			rest: "PATCH /:id",
+
+			params: {
+				id: "any",
+				name: "string|min:3",
+				description: "string|min:3",
+				unitofmeasure: "string|min:1",
+				price: "number|positive",
+			},
+
+			async handler(ctx) {
+				const doc = await this.adapter.updateById(
+					parseInt(ctx.params.id, 10),
+					{
+						name: ctx.params.name,
+						lastName: ctx.params.lastName,
+						address: ctx.params.address,
+						phone: ctx.params.phone,
+					}
+				);
+
+				const json = await this.transformDocuments(
+					ctx,
+					ctx.params,
+					doc
+				);
 				await this.entityChanged("updated", json, ctx);
 
 				return json;
-			}
-		}
+			},
+		},
+
+		delete: {
+			rest: "DELETE /:_id",
+
+			params: {
+				_id: "any",
+			},
+
+			async handler(ctx) {
+				const doc = await this.adapter.removeById(
+					parseInt(ctx.params._id, 10)
+				);
+
+				const json = await this.transformDocuments(
+					ctx,
+					ctx.params,
+					doc
+				);
+				await this.entityChanged("deleted", json, ctx);
+
+				return json;
+			},
+		},
 	},
 
 	/**
@@ -120,11 +185,29 @@ module.exports = {
 		 */
 		async seedDB() {
 			await this.adapter.insertMany([
-				{ name: "Samsung Galaxy S10 Plus", quantity: 10, price: 704 },
-				{ name: "iPhone 11 Pro", quantity: 25, price: 999 },
-				{ name: "Huawei P30 Pro", quantity: 15, price: 679 },
+				{
+					_id: 1,
+					name: "Samsung Galaxy S10 Plus",
+					description: "nuevi",
+					unitofmeasure: "gm",
+					price: 704,
+				},
+				{
+					_id: 2,
+					name: "iPhone 11 Pro",
+					description: "usado",
+					unitofmeasure: "gm",
+					price: 999,
+				},
+				{
+					_id: 3,
+					name: "Huawei P30 Pro",
+					description: "de segunda",
+					unitofmeasure: "gm",
+					price: 679,
+				},
 			]);
-		}
+		},
 	},
 
 	/**
@@ -132,5 +215,5 @@ module.exports = {
 	 */
 	async afterConnected() {
 		// await this.adapter.collection.createIndex({ name: 1 });
-	}
+	},
 };
