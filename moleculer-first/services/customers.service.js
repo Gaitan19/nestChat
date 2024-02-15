@@ -100,6 +100,62 @@ module.exports = {
 				return json;
 			},
 		},
+
+		find: {
+			rest: "GET /:id",
+			params: {
+				id: "any",
+			},
+
+			/** @param {Context} ctx */
+			async handler(ctx) {
+				const doc = await this.adapter.findById(
+					parseInt(ctx.params.id, 10)
+				);
+
+				const json = await this.transformDocuments(
+					ctx,
+					ctx.params,
+					doc
+				);
+
+				return json;
+			},
+		},
+
+		update: {
+			rest: "PATCH /:id",
+
+			params: {
+				id: "any",
+				name: "string|min:3",
+				lastName: "string|min:3",
+				address: "string|min:3",
+				phone: "number|integer|positive",
+			},
+
+			async handler(ctx) {
+				const doc = await this.adapter.updateById(
+					parseInt(ctx.params.id, 10),
+					{
+						name: ctx.params.name,
+						lastName: ctx.params.lastName,
+						address: ctx.params.address,
+						phone: ctx.params.phone,
+					}
+				);
+
+				console.log("doc :>> ", doc);
+				const json = await this.transformDocuments(
+					ctx,
+					ctx.params,
+					doc
+				);
+				await this.entityChanged("updated", json, ctx);
+
+				return json;
+			},
+		},
 	},
 
 	/**

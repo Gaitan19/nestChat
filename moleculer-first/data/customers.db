@@ -1,5 +1,4 @@
 {"_id":1,"name":"kevin","lastName":"gonzales","address":"managua","phone":87549961}
 {"_id":2,"name":"manolo","lastName":"lopez","address":"granada","phone":77144451}
 {"_id":3,"name":"luis","lastName":"hernandez","address":"leon","phone":58083149}
-{"_id":4,"name":"evanks","lastName":"gaitan","address":"masaya","phone":58083149}
-{"_id":9,"name":"manuel","lastName":"gaitan","address":"masaya","phone":58083149}
+{"name":"jose","lastName":"hernandez","address":"leon","phone":58083149,"_id":9}
