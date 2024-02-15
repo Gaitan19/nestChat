@@ -9,27 +9,24 @@ const DbMixin = require("../mixins/db.mixin");
 
 /** @type {ServiceSchema} */
 module.exports = {
-	name: "products",
+	name: "invoices",
 	// version: 1
 
 	/**
 	 * Mixins
 	 */
-	mixins: [DbMixin("products")],
+	mixins: [DbMixin("invoices")],
 
 	/**
 	 * Settings
 	 */
 	settings: {
 		// Available fields in the responses
-		fields: ["_id", "name", "description", "unitofmeasure", "price"],
+		fields: ["_id", "total"],
 
 		// Validator for the `create` & `insert` actions.
 		entityValidator: {
-			name: "string|min:3",
-			description: "string|min:3",
-			unitofmeasure: "string|min:1",
-			price: "number|positive",
+			total: "number|positive",
 		},
 	},
 
@@ -67,10 +64,7 @@ module.exports = {
 			rest: "POST /",
 			params: {
 				id: "number|integer|positive",
-				name: "string|min:3",
-				description: "string|min:3",
-				unitofmeasure: "string|min:1",
-				price: "number|positive",
+				total: "number|positive",
 			},
 
 			/** @param {Context} ctx */
@@ -78,10 +72,7 @@ module.exports = {
 				const doc = await this.adapter.create({
 					$inc: {
 						_id: ctx.params.id,
-						name: ctx.params.name,
-						description: ctx.params.description,
-						unitofmeasure: ctx.params.unitofmeasure,
-						price: ctx.params.price,
+						total: ctx.params.total,
 					},
 				});
 				const json = await this.transformDocuments(
@@ -122,20 +113,14 @@ module.exports = {
 
 			params: {
 				id: "any",
-				name: "string|min:3",
-				description: "string|min:3",
-				unitofmeasure: "string|min:1",
-				price: "number|positive",
+				total: "number|positive",
 			},
 
 			async handler(ctx) {
 				const doc = await this.adapter.updateById(
 					parseInt(ctx.params.id, 10),
 					{
-						name: ctx.params.name,
-						description: ctx.params.description,
-						unitofmeasure: ctx.params.unitofmeasure,
-						price: ctx.params.price,
+						total: ctx.params.name,
 					}
 				);
 
@@ -187,24 +172,15 @@ module.exports = {
 			await this.adapter.insertMany([
 				{
 					_id: 1,
-					name: "Samsung Galaxy S10 Plus",
-					description: "nuevi",
-					unitofmeasure: "gm",
-					price: 704,
+					total: 704,
 				},
 				{
 					_id: 2,
-					name: "iPhone 11 Pro",
-					description: "usado",
-					unitofmeasure: "gm",
-					price: 999,
+					total: 999,
 				},
 				{
 					_id: 3,
-					name: "Huawei P30 Pro",
-					description: "de segunda",
-					unitofmeasure: "gm",
-					price: 679,
+					total: 679,
 				},
 			]);
 		},
