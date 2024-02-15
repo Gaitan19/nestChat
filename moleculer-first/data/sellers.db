@@ -1,0 +1,5 @@
+{"_id":1,"name":"kevin","lastName":"gonzales"}
+{"_id":2,"name":"manolo","lastName":"lopez"}
+{"_id":3,"name":"luis","lastName":"hernandez"}
+{"_id":8,"name":"jose","lastName":"hernandez","address":"leon","phone":58083149}
+{"name":"manolo","lastName":"hernandez","_id":8}
