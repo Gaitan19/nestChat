@@ -171,7 +171,7 @@ module.exports = {
 				this.broker.emit("entity.crud", {
 					service: "invoice",
 					method: "DELETE",
-					id: ctx.params.id,
+					id: ctx.params._id,
 				});
 
 				return json;

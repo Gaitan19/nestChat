@@ -203,7 +203,7 @@ module.exports = {
 				this.broker.emit("entity.crud", {
 					service: "customer",
 					method: "DELETE",
-					id: ctx.params.id,
+					id: ctx.params._id,
 				});
 				return json;
 			},

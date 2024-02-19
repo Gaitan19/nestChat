@@ -1,5 +1,3 @@
-{"lastName":"lopez","address":"managua","_id":2}
-{"update":{"_id":3,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":3}
 {"_id":22,"name":"lolo","lastName":"lopez","address":"managua","phone":58083149}
 {"_id":24,"name":"lolo","lastName":"lopez","address":"managua","phone":58083149}
 {"_id":25,"name":"lolo","lastName":"lopez","address":"managua","phone":58083149}
@@ -7,7 +5,8 @@
 {"_id":28,"name":"lolo","lastName":"lopez","address":"managua","phone":58083149}
 {"_id":29,"name":"lolo","lastName":"lopez","address":"managua","phone":58083149}
 {"_id":30,"name":"eduardo","lastName":"lopez","address":"managua","phone":58083149}
-{"update":{"update":{"update":{"update":{"update":{"name":"leon","lastName":"lopez","address":"managua","phone":58083149,"_id":34},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34}
+{"update":{"update":{"update":{"update":{"update":{"name":"leon","lastName":"lopez","address":"managua","phone":58083149,"_id":34},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"luis","lastName":"lopez","address":"managua","phone":58083149}
+{"_id":39,"name":"ken","lastName":"evanks","address":"managua","phone":58083149}
 {"_id":301,"name":"eduardo","lastName":"lopez","address":"managua","phone":58083149}
 {"name":"luisas","lastName":"lopez","address":"managua","phone":58083149,"_id":"893z1Bz05JShXmNM"}
 {"id":21,"name":"manuela","lastName":"lopez","address":"managua","phone":58083149,"_id":"Ak7ZWNxoxKLMB326"}
@@ -15,7 +14,3 @@
 {"id":22,"name":"lolo","lastName":"lopez","address":"managua","phone":58083149,"_id":"jFzDh7BnPgjDPA7F"}
 {"name":"luisas","lastName":"lopez","address":"managua","phone":58083149,"_id":"rdjohPpdtrY1QUu5"}
 {"name":"luisa","lastName":"lopez","address":"managua","phone":58083149,"_id":"uGjLHhOFEQMuIPJb"}
-{"update":{"update":{"update":{"update":{"update":{"name":"leon","lastName":"lopez","address":"managua","phone":58083149,"_id":34},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149}
-{"update":{"update":{"update":{"update":{"update":{"name":"leon","lastName":"lopez","address":"managua","phone":58083149,"_id":34},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"lalo","lastName":"lopez","address":"managua","phone":58083149},"_id":34,"name":"luis","lastName":"lopez","address":"managua","phone":58083149}
-{"_id":39,"name":"kenley","lastName":"evanks","address":"managua","phone":58083149}
-{"_id":39,"name":"ken","lastName":"evanks","address":"managua","phone":58083149}
