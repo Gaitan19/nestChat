@@ -93,6 +93,12 @@ module.exports = {
 				);
 				await this.entityChanged("created", json, ctx);
 
+				this.broker.emit("entity.crud", {
+					service: "seller",
+					method: "POST",
+					id: json._id,
+				});
+
 				return json;
 			},
 		},
@@ -100,14 +106,15 @@ module.exports = {
 		find: {
 			rest: "GET /:id",
 			params: {
-				id: "any",
+				id: {
+					type: "number",
+					convert: true,
+				},
 			},
 
 			/** @param {Context} ctx */
 			async handler(ctx) {
-				const doc = await this.adapter.findById(
-					parseInt(ctx.params.id, 10)
-				);
+				const doc = await this.adapter.findById(ctx.params.id);
 
 				const json = await this.transformDocuments(
 					ctx,
@@ -123,7 +130,10 @@ module.exports = {
 			rest: "PATCH /:id",
 
 			params: {
-				id: "any",
+				id: {
+					type: "number",
+					convert: true,
+				},
 				name: "string|min:3",
 				lastName: "string|min:3",
 			},
@@ -146,6 +156,12 @@ module.exports = {
 				);
 				await this.entityChanged("updated", json, ctx);
 
+				this.broker.emit("entity.crud", {
+					service: "seller",
+					method: "UPDATE",
+					id: json._id,
+				});
+
 				return json;
 			},
 		},
@@ -154,13 +170,14 @@ module.exports = {
 			rest: "DELETE /:_id",
 
 			params: {
-				_id: "any",
+				_id: {
+					type: "number",
+					convert: true,
+				},
 			},
 
 			async handler(ctx) {
-				const doc = await this.adapter.removeById(
-					parseInt(ctx.params._id, 10)
-				);
+				const doc = await this.adapter.removeById(ctx.params._id);
 
 				const json = await this.transformDocuments(
 					ctx,
@@ -168,6 +185,12 @@ module.exports = {
 					doc
 				);
 				await this.entityChanged("deleted", json, ctx);
+
+				this.broker.emit("entity.crud", {
+					service: "seller",
+					method: "DELETE",
+					id: ctx.params.id,
+				});
 
 				return json;
 			},
