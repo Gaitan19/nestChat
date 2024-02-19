@@ -128,10 +128,10 @@ module.exports = {
 
 			params: {
 				id: "any",
-				name: "string|min:3",
-				lastName: "string|min:3",
-				address: "string|min:3",
-				phone: "number|integer|positive",
+				name: "string|min:3|optional",
+				lastName: "string|min:3|optional",
+				address: "string|min:3|optional",
+				phone: "number|integer|positive|optional",
 			},
 
 			async handler(ctx) {
