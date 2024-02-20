@@ -9,13 +9,13 @@ const DbMixin = require("../db/database.mixin");
 
 /** @type {ServiceSchema} */
 module.exports = {
-	name: "sellers",
+	name: "invoicesDetail",
 	// version: 1
 
 	/**
 	 * Mixins
 	 */
-	mixins: [DbMixin("seller")],
+	mixins: [DbMixin("invoiceDetail")],
 
 	/**
 	 * Settings
@@ -28,13 +28,10 @@ module.exports = {
 		before: {
 			/**
 			 * Register a before hook for the `create` action.
-			 * It sets a default value for the quantity field.
+			 * It sets a default value for the description field.
 			 *
 			 * @param {Context} ctx
 			 */
-			// create(ctx) {
-			// 	ctx.params.quantity = 0;
-			// },
 		},
 	},
 
@@ -53,15 +50,13 @@ module.exports = {
 		 *  - remove
 		 */
 		// --- ADDITIONAL ACTIONS ---
-		/**
-		 * Increase the quantity of the product item.
-		 */
 
 		create: {
 			rest: "POST /",
 			params: {
-				name: "string|min:3",
-				lastName: "string|min:3",
+				productId: "number|integer|convert",
+				invoiceId: "number|integer|convert",
+				price: "number|positive|convert",
 			},
 
 			/** @param {Context} ctx */
@@ -75,7 +70,7 @@ module.exports = {
 				await this.entityChanged("created", json, ctx);
 
 				this.broker.emit("entity.crud", {
-					service: "seller",
+					service: "invoiceDetail",
 					method: "POST",
 					id: json.id,
 				});
@@ -115,22 +110,23 @@ module.exports = {
 					type: "number",
 					convert: true,
 				},
-				name: "string|min:3|optional",
-				lastName: "string|min:3|optional",
+				productId: "number|integer|convert|optional",
+				invoiceId: "number|integer|convert|optional",
+				price: "number|positive|optional",
 			},
 
 			async handler(ctx) {
-				const updatedValue = await this.adapter.findById(ctx.params.id);
-				const { name, lastName } = ctx.params;
+				const updateValue = await this.adapter.findById(ctx.params.id);
 
-				if (name) updatedValue.dataValues.name = name;
-				if (lastName) updatedValue.dataValues.lastName = lastName;
+				const { productId, invoiceId, price } = ctx.params;
+
+				if (productId) updateValue.productId = productId;
+				if (invoiceId) updateValue.invoiceId = invoiceId;
+				if (price) updateValue.price = price;
 
 				const doc = await this.adapter.updateById(ctx.params.id, {
-					...updatedValue.dataValues,
+					...updateValue,
 				});
-
-				console.log("doc :>> ", doc);
 
 				const json = await this.transformDocuments(
 					ctx,
@@ -140,7 +136,7 @@ module.exports = {
 				await this.entityChanged("updated", json, ctx);
 
 				this.broker.emit("entity.crud", {
-					service: "seller",
+					service: "invoiceDetail",
 					method: "UPDATE",
 					id: json.id,
 				});
@@ -170,7 +166,7 @@ module.exports = {
 				await this.entityChanged("deleted", json, ctx);
 
 				this.broker.emit("entity.crud", {
-					service: "seller",
+					service: "invoiceDetail",
 					method: "DELETE",
 					id: ctx.params.id,
 				});

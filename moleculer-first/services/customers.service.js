@@ -75,11 +75,11 @@ module.exports = {
 					doc
 				);
 
-				// this.broker.emit("entity.crud", {
-				// 	service: "customer",
-				// 	method: "POST",
-				// 	id: json.id,
-				// });
+				this.broker.emit("entity.crud", {
+					service: "customer",
+					method: "POST",
+					id: json.id,
+				});
 
 				await this.entityChanged("created", json, ctx);
 
@@ -146,11 +146,11 @@ module.exports = {
 				);
 				await this.entityChanged("updated", json, ctx);
 
-				// this.broker.emit("entity.crud", {
-				// 	service: "customer",
-				// 	method: "UPDATE",
-				// 	id: json.id,
-				// });
+				this.broker.emit("entity.crud", {
+					service: "customer",
+					method: "UPDATE",
+					id: json.id,
+				});
 
 				return json;
 			},

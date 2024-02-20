@@ -1,5 +1,6 @@
 {"description":"customer: 34 was UPDATE D ","date":1708356190558,"_id":"1nwz1rsnNtqXzs7I"}
 {"description":"products: 1 was POSTED ","date":1708438402477,"_id":"1rimQcSD87WtoWlA"}
+{"description":"invoice: 1 was POSTED ","date":1708439408040,"_id":"2dtmsFhEqlCh9y53"}
 {"description":"customer: 34 was UPDATED ","date":1708358169725,"_id":"3tnq3lVdPKZnUuRT"}
 {"description":"customer: 22 was DELETED ","date":1708358465521,"_id":"8aMxKOIkPVU8nw4e"}
 {"description":"customer: 34 was UPDATED ","date":1708357944098,"_id":"8bbuCmJg1ZCexlfo"}
@@ -31,4 +32,7 @@
 {"description":"customer: 34 was UPDATED ","date":1708358017420,"_id":"rcuNlAXQQUAyAnnN"}
 {"description":"customer: 2 was POSTED ","date":1708355911078,"_id":"ssaBwtGIe4StBvlw"}
 {"description":"seller: 1 was POSTED ","date":1708396476103,"_id":"t3I9eCST51L2jtg4"}
-{"description":"invoice: 1 was POSTED ","date":1708439408040,"_id":"2dtmsFhEqlCh9y53"}
+{"description":"invoice: 1 was POSTED ","date":1708439961134,"_id":"KmYuxhgTvxadnMa0"}
+{"description":"invoiceDetail: 1 was POSTED ","date":1708439975859,"_id":"OIZm9CM8aIKPMZu5"}
+{"description":"products: 2 was POSTED ","date":1708440028027,"_id":"LFohbouiY28nObZI"}
+{"description":"invoiceDetail: 2 was POSTED ","date":1708440055329,"_id":"dnfvKeQYuFfLQ2zy"}

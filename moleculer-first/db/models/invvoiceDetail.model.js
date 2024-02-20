@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 
 module.exports = {
-	name: "invoice",
+	name: "invoiceDetail",
 	define: {
 		id: {
 			type: Sequelize.INTEGER,
@@ -9,28 +9,28 @@ module.exports = {
 			primaryKey: true,
 		},
 
-		sellerId: {
+		productId: {
 			type: Sequelize.INTEGER,
 			references: {
-				model: "sellers",
+				model: "products",
 				key: "id",
 			},
 		},
 
-		customerId: {
+		invoiceId: {
 			type: Sequelize.INTEGER,
 			references: {
-				model: "customers",
+				model: "invoices",
 				key: "id",
 			},
 		},
 
-		total: {
+		price: {
 			type: Sequelize.INTEGER,
 		},
 	},
 	options: {
 		// Options from https://sequelize.org/docs/v6/moved/models-definition/
-		modelName: "invoice",
+		modelName: "invoiceDetail",
 	},
 };

@@ -1,6 +1,6 @@
 "use strict";
 
-const DbMixin = require("../mixins/db.mixin");
+const DbMixin = require("../db/database.mixin");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -15,21 +15,11 @@ module.exports = {
 	/**
 	 * Mixins
 	 */
-	mixins: [DbMixin("logs")],
+	mixins: [DbMixin("log")],
 
 	/**
 	 * Settings
-	 */
-	settings: {
-		// Available fields in the responses
-		fields: ["_id", "description", "date"],
-
-		// Validator for the `create` & `insert` actions.
-		entityValidator: {
-			description: "string|min:3",
-			date: "date",
-		},
-	},
+	
 
 	/**
 	 * Action Hooks
@@ -55,7 +45,10 @@ module.exports = {
 		find: {
 			rest: "GET /:id",
 			params: {
-				id: "any",
+				id: {
+					type: "number",
+					convert: true,
+				},
 			},
 
 			/** @param {Context} ctx */
@@ -95,22 +88,14 @@ module.exports = {
 
 	events: {
 		"entity.crud": {
-			// Register handler to the "other" group instead of "payment" group.
 			async handler(ctx) {
 				const { method, id, service } = ctx.params;
-				const date = new Date();
 				await this.adapter.insert({
 					description: `${service}: ${id} was ${method}${
 						method === "POST" ? "ED" : "D"
 					} `,
 					date: Date.now(),
 				});
-
-				console.log("ctx :>> ", ctx.params);
-				// console.log("Payload:", ctx.params);
-				// console.log("Sender:", ctx.nodeID);
-				// console.log("Metadata:", ctx.meta);
-				// console.log("The called event name:", ctx.eventName);
 			},
 		},
 	},

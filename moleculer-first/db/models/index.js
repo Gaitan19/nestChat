@@ -4,6 +4,8 @@ const customerModel = require("./customer.model");
 const sellerModel = require("./seller.model");
 const productModel = require("./product.model");
 const invoiceModel = require("./invoice.model");
+const invoiceDetailModel = require("./invvoiceDetail.model");
+const logModel = require("./log.model");
 
 module.exports = {
 	author: authorModel,
@@ -12,4 +14,6 @@ module.exports = {
 	seller: sellerModel,
 	product: productModel,
 	invoice: invoiceModel,
+	invoiceDetail: invoiceDetailModel,
+	log: logModel,
 };
