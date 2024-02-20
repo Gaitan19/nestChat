@@ -1,6 +1,6 @@
 "use strict";
 
-const DbMixin = require("../mixins/db.mixin");
+const DbMixin = require("../db/database.mixin");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -15,20 +15,11 @@ module.exports = {
 	/**
 	 * Mixins
 	 */
-	mixins: [DbMixin("invoices")],
+	mixins: [DbMixin("invoice")],
 
 	/**
 	 * Settings
 	 */
-	settings: {
-		// Available fields in the responses
-		fields: ["_id", "total"],
-
-		// Validator for the `create` & `insert` actions.
-		entityValidator: {
-			total: "number|positive",
-		},
-	},
 
 	/**
 	 * Action Hooks
@@ -60,21 +51,17 @@ module.exports = {
 		 */
 		// --- ADDITIONAL ACTIONS ---
 
-		created: {
+		create: {
 			rest: "POST /",
 			params: {
-				id: "number|integer|positive",
-				total: "number|positive",
+				sellerId: "number|integer|convert",
+				customerId: "number|integer|convert",
+				total: "number|positive|convert",
 			},
 
 			/** @param {Context} ctx */
 			async handler(ctx) {
-				const doc = await this.adapter.create({
-					$inc: {
-						_id: ctx.params.id,
-						total: ctx.params.total,
-					},
-				});
+				const doc = await this.adapter.insert(ctx.params);
 				const json = await this.transformDocuments(
 					ctx,
 					ctx.params,
@@ -85,7 +72,7 @@ module.exports = {
 				this.broker.emit("entity.crud", {
 					service: "invoice",
 					method: "POST",
-					id: json._id,
+					id: json.id,
 				});
 
 				return json;
@@ -123,12 +110,22 @@ module.exports = {
 					type: "number",
 					convert: true,
 				},
-				total: "number|positive",
+				sellerId: "number|integer|convert|optional",
+				customerId: "number|integer|convert|optional",
+				total: "number|positive|optional",
 			},
 
 			async handler(ctx) {
+				const updateValue = await this.adapter.findById(ctx.params.id);
+
+				const { sellerId, customerId, total } = ctx.params;
+
+				if (sellerId) updateValue.sellerId = sellerId;
+				if (customerId) updateValue.customerId = customerId;
+				if (total) updateValue.total = total;
+
 				const doc = await this.adapter.updateById(ctx.params.id, {
-					total: ctx.params.name,
+					...updateValue,
 				});
 
 				const json = await this.transformDocuments(
@@ -141,7 +138,7 @@ module.exports = {
 				this.broker.emit("entity.crud", {
 					service: "invoice",
 					method: "UPDATE",
-					id: json._id,
+					id: json.id,
 				});
 
 				return json;
@@ -149,17 +146,17 @@ module.exports = {
 		},
 
 		delete: {
-			rest: "DELETE /:_id",
+			rest: "DELETE /:id",
 
 			params: {
-				_id: {
+				id: {
 					type: "number",
 					convert: true,
 				},
 			},
 
 			async handler(ctx) {
-				const doc = await this.adapter.removeById(ctx.params._id);
+				const doc = await this.adapter.removeById(ctx.params.id);
 
 				const json = await this.transformDocuments(
 					ctx,
@@ -171,7 +168,7 @@ module.exports = {
 				this.broker.emit("entity.crud", {
 					service: "invoice",
 					method: "DELETE",
-					id: ctx.params._id,
+					id: ctx.params.id,
 				});
 
 				return json;
@@ -188,22 +185,6 @@ module.exports = {
 		 * It is called in the DB.mixin after the database
 		 * connection establishing & the collection is empty.
 		 */
-		async seedDB() {
-			await this.adapter.insertMany([
-				{
-					_id: 1,
-					total: 704,
-				},
-				{
-					_id: 2,
-					total: 999,
-				},
-				{
-					_id: 3,
-					total: 679,
-				},
-			]);
-		},
 	},
 
 	/**
