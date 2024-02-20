@@ -127,23 +127,23 @@ module.exports = {
 			},
 
 			async handler(ctx) {
-				const update = await this.adapter.findById(ctx.params.id);
+				const updateValue = await this.adapter.findById(ctx.params.id);
 
 				const { name, lastName, address, phone } = ctx.params;
 
-				if (name) update.name = name;
-				if (lastName) update.lastName = lastName;
-				if (address) update.address = address;
-				if (phone) update.phone = phone;
+				if (name) updateValue.name = name;
+				if (lastName) updateValue.lastName = lastName;
+				if (address) updateValue.address = address;
+				if (phone) updateValue.phone = phone;
 
 				const doc = await this.adapter.updateById(ctx.params.id, {
-					...update,
+					...updateValue,
 				});
 				console.log("doc :>> ", doc);
 				const json = await this.transformDocuments(
 					ctx,
 					ctx.params,
-					update
+					updateValue
 				);
 				await this.entityChanged("updated", json, ctx);
 

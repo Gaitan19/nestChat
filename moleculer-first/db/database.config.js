@@ -1,6 +1,6 @@
 module.exports = {
 	host: "localhost",
-	port: "3307",
+	port: "3306",
 	database: "db_moleculer",
 	username: "root",
 	password: "admin",

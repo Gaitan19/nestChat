@@ -1,6 +1,6 @@
 "use strict";
 
-const DbMixin = require("../mixins/db.mixin");
+const DbMixin = require("../db/database.mixin");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -15,23 +15,11 @@ module.exports = {
 	/**
 	 * Mixins
 	 */
-	mixins: [DbMixin("products")],
+	mixins: [DbMixin("product")],
 
 	/**
 	 * Settings
 	 */
-	settings: {
-		// Available fields in the responses
-		fields: ["_id", "name", "description", "unitofmeasure", "price"],
-
-		// Validator for the `create` & `insert` actions.
-		entityValidator: {
-			name: "string|min:3",
-			description: "string|min:3",
-			unitofmeasure: "string|min:1",
-			price: "number|positive",
-		},
-	},
 
 	/**
 	 * Action Hooks
@@ -63,10 +51,9 @@ module.exports = {
 		 */
 		// --- ADDITIONAL ACTIONS ---
 
-		created: {
+		create: {
 			rest: "POST /",
 			params: {
-				id: "number|integer|positive",
 				name: "string|min:3",
 				description: "string|min:3",
 				unitofmeasure: "string|min:1",
@@ -75,15 +62,7 @@ module.exports = {
 
 			/** @param {Context} ctx */
 			async handler(ctx) {
-				const doc = await this.adapter.create({
-					$inc: {
-						_id: ctx.params.id,
-						name: ctx.params.name,
-						description: ctx.params.description,
-						unitofmeasure: ctx.params.unitofmeasure,
-						price: ctx.params.price,
-					},
-				});
+				const doc = await this.adapter.insert(ctx.params);
 				const json = await this.transformDocuments(
 					ctx,
 					ctx.params,
@@ -94,7 +73,7 @@ module.exports = {
 				this.broker.emit("entity.crud", {
 					service: "products",
 					method: "POST",
-					id: json._id,
+					id: json.id,
 				});
 
 				return json;
@@ -135,15 +114,21 @@ module.exports = {
 				name: "string|min:3",
 				description: "string|min:3",
 				unitofmeasure: "string|min:1",
-				price: "number|positive",
+				price: "number|positive|convert",
 			},
 
 			async handler(ctx) {
+				const updateValue = await this.adapter.findById(ctx.params.id);
+
+				const { name, description, unitofmeasure, price } = ctx.params;
+
+				if (name) updateValue.name = name;
+				if (description) updateValue.description = description;
+				if (unitofmeasure) updateValue.unitofmeasure = unitofmeasure;
+				if (price) updateValue.price = price;
+
 				const doc = await this.adapter.updateById(ctx.params.id, {
-					name: ctx.params.name,
-					description: ctx.params.description,
-					unitofmeasure: ctx.params.unitofmeasure,
-					price: ctx.params.price,
+					...updateValue,
 				});
 
 				const json = await this.transformDocuments(
@@ -156,7 +141,7 @@ module.exports = {
 				this.broker.emit("entity.crud", {
 					service: "products",
 					method: "UPDATE",
-					id: json._id,
+					id: json.id,
 				});
 
 				return json;
@@ -164,17 +149,17 @@ module.exports = {
 		},
 
 		delete: {
-			rest: "DELETE /:_id",
+			rest: "DELETE /:id",
 
 			params: {
-				_id: {
+				id: {
 					type: "number",
 					convert: true,
 				},
 			},
 
 			async handler(ctx) {
-				const doc = await this.adapter.removeById(ctx.params._id);
+				const doc = await this.adapter.removeById(ctx.params.id);
 
 				const json = await this.transformDocuments(
 					ctx,
@@ -186,7 +171,7 @@ module.exports = {
 				this.broker.emit("entity.crud", {
 					service: "products",
 					method: "DELETE",
-					id: ctx.params._id,
+					id: ctx.params.id,
 				});
 
 				return json;
@@ -203,31 +188,6 @@ module.exports = {
 		 * It is called in the DB.mixin after the database
 		 * connection establishing & the collection is empty.
 		 */
-		async seedDB() {
-			await this.adapter.insertMany([
-				{
-					_id: 1,
-					name: "Samsung Galaxy S10 Plus",
-					description: "nuevi",
-					unitofmeasure: "gm",
-					price: 704,
-				},
-				{
-					_id: 2,
-					name: "iPhone 11 Pro",
-					description: "usado",
-					unitofmeasure: "gm",
-					price: 999,
-				},
-				{
-					_id: 3,
-					name: "Huawei P30 Pro",
-					description: "de segunda",
-					unitofmeasure: "gm",
-					price: 679,
-				},
-			]);
-		},
 	},
 
 	/**
